@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bonc.esexplore.mapper.QueryAuthorityMapper">
+    <!--用户权限 不能看哪些指标专题报告-->
+    <select id="getAuthority" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+        select K_AUTHORITY,T_AUTHORITY,R_AUTHORITY from USER_AUTHORITY t where
+        <if test="userId != null and userId != ''">
+            t.USER_ID=#{userId,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <!--通过指标level名称找id-->
+    <select id="getChild" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select LEVEL_ID from DMCODE_PUB.DMCODE_KPI_LEVEL
+        where
+        <if test="pid != null">
+            LEVEL_DESC=#{pid,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <!--通过指标level id找id-->
+    <select id="getChildById" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select LEVEL_ID from DMCODE_PUB.DMCODE_KPI_LEVEL
+        where
+        <if test="pid != null">
+            LEVEL_ID=#{pid,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <!--通过专题level名称找id-->
+    <select id="getChildSubject" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select LEVEL_ID from dw_newquery_subject_level
+        where
+        <if test="pid != null">
+            LEVEL_DESC=#{pid,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <!--通过专题level id找id-->
+    <select id="getChildSubjectById" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select LEVEL_ID from dw_newquery_subject_level
+        where
+        <if test="pid != null">
+            LEVEL_ID=#{pid,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <!--属于相同level id的指标拿出来-->
+    <select id="getKpi" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+        select a.KPI_CODE,a.KPI_FULL_NAME,a.LABEL_TYPE,a.IS_MINUS from DMCODE_PUB.DMCODE_COMP_KPI_MAPPING a
+        where
+        <if test="pid_code !=null">
+            a.KPI_LEVEL in
+            <foreach collection="pid_code" open="(" separator="," close=")" item="pid_code_id">
+                #{pid_code_id}
+            </foreach>
+            AND
+        </if>
+        <if test="label_type != null and label_type != ''">
+            a.LABEL_TYPE=#{label_type,jdbcType=VARCHAR} AND
+        </if>
+        <if test="kpiAuth !=null">
+            a.KPI_CODE not in
+            <foreach collection="kpiAuth" open="(" separator="," close=")" item="kpiAuthId">
+                #{kpiAuthId}
+            </foreach>
+            AND
+        </if>
+        1=1
+        ORDER BY a.KPI_LEVEL
+</select>
+    <!--属于相同level id的指标个数拿出来-->
+    <select id="getKpiCount" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+        select count(*) AS "count" from DMCODE_PUB.DMCODE_COMP_KPI_MAPPING a
+        where
+        <if test="pid_code !=null">
+            a.KPI_LEVEL in
+            <foreach collection="pid_code" open="(" separator="," close=")" item="pid_code_id">
+                #{pid_code_id}
+            </foreach>
+            AND
+        </if>
+        <if test="label_type != null and label_type != ''">
+            a.LABEL_TYPE=#{label_type,jdbcType=VARCHAR} AND
+        </if>
+        <if test="kpiAuth !=null">
+            a.KPI_CODE not in
+            <foreach collection="kpiAuth" open="(" separator="," close=")" item="kpiAuthId">
+                #{kpiAuthId}
+            </foreach>
+            AND
+        </if>
+        1=1
+    </select>
+    <!--属于相同level id的专题拿出来-->
+    <select id="getSub" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+        select a.SUBJECT_CODE,a.SUBJECT_NAME,a.SUBJECT_DESC,a.LABEL_TYPE from dw_newquery_subject a
+        where
+        <if test="pid_code !=null">
+            a.LEVEL_ID in
+            <foreach collection="pid_code" open="(" separator="," close=")" item="pid_code_id">
+                #{pid_code_id}
+            </foreach>
+            AND
+        </if>
+        <if test="label_type != null and label_type != ''">
+            a.LABEL_TYPE=#{label_type,jdbcType=VARCHAR} AND
+        </if>
+        <if test="subAuth !=null">
+            a.SUBJECT_CODE not in
+            <foreach collection="subAuth" open="(" separator="," close=")" item="subAuthId">
+                #{subAuthId}
+            </foreach>
+            AND
+        </if>
+        1=1
+        ORDER BY a.LEVEL_ID
+    </select>
+    <!--属于相同level id的专题个数拿出来-->
+    <select id="getSubCount" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+        select count(*) AS "count" from dw_newquery_subject a
+        where
+        <if test="pid_code !=null">
+            a.LEVEL_ID in
+            <foreach collection="pid_code" open="(" separator="," close=")" item="pid_code_id">
+                #{pid_code_id}
+            </foreach>
+            AND
+        </if>
+        <if test="label_type != null and label_type != ''">
+            a.LABEL_TYPE=#{label_type,jdbcType=VARCHAR} AND
+        </if>
+        <if test="subAuth !=null">
+            a.SUBJECT_CODE not in
+            <foreach collection="subAuth" open="(" separator="," close=")" item="subAuthId">
+                #{subAuthId}
+            </foreach>
+            AND
+        </if>
+        1=1
+    </select>
+    <!--我这里只需要去指标表里找到某一个level下对应的kpi_code就行-->
+</mapper>
