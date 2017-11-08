@@ -2,6 +2,7 @@ package com.bonc.esexplore.fulltextsearch;
 
 import com.bonc.esexplore.dataform.DataForm;
 import com.bonc.esexplore.until.CodeTable;
+import com.bonc.esexplore.until.OneBecomeMore;
 import com.bonc.esexplore.until.SetESConfig;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -27,8 +28,10 @@ import java.util.List;
 public class GetDataIntegrated {
 
     public static String esIndex;
+    public static int count=0;
+    public static int count2=0;
 
-    public static List<HashMap<String, Object>> getData(TransportClient client, String searchWord, String from, String size, HashMap<String,Object> hashMapAuth, String tabId, HashMap<String, Integer> ratingMap){
+    public static List<HashMap<String, Object>> getData(TransportClient client, String searchWord, String from, String size, HashMap<String,Object> hashMapAuth, String tabId, HashMap<String, Integer> ratingMap,List<HashMap<String, Object>> dimensionList){
         HashMap<String,String> propertiesMap = SetESConfig.getPropertiesES();
         esIndex = propertiesMap.get("esIndex");
         //有输入的
@@ -94,8 +97,10 @@ public class GetDataIntegrated {
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                     .setQuery(boolQueryBuilder)
                     .addSort("_score", SortOrder.DESC).addSort("KPI_Name_Length", SortOrder.ASC).addSort("Subject_Name_Length", SortOrder.ASC).addSort("Report_Name_Length", SortOrder.ASC)
-                    .setFrom(Integer.parseInt(from) - 1)
-                    .setSize(Integer.parseInt(size))
+                    //.setFrom(Integer.parseInt(from) - 1)
+                    //.setSize(Integer.parseInt(size))
+                    .setFrom(0)
+                    .setSize(500)
                     .get();
             SearchHits hits = response.getHits();
             System.out.println("用户有输入关键词:"+searchWord);
@@ -106,7 +111,11 @@ public class GetDataIntegrated {
                 HashMap<String, Object> tmpMap = DataForm.dataForm(searchHit.getType(), searchHit, ratingMap);
                 resultList.add(tmpMap);
             }
-            return resultList;
+
+            List<HashMap<String, Object>> resultListF = OneBecomeMore.oneBecomeMore(resultList,dimensionList);
+            count = resultListF.size();
+
+            return resultListF;
             //什么都不输入的
         }else{
             List<String> K_AUTHORITY = new ArrayList<>();
@@ -159,7 +168,11 @@ public class GetDataIntegrated {
                 HashMap<String, Object> tmpMap = DataForm.dataForm(searchHit.getType(), searchHit, ratingMap);
                 resultList.add(tmpMap);
             }
-            return resultList;
+
+            List<HashMap<String, Object>> resultListF = OneBecomeMore.oneBecomeMore(resultList,dimensionList);
+            count2 = resultListF.size();
+
+            return resultListF;
         }
     }
 
@@ -230,7 +243,8 @@ public class GetDataIntegrated {
                     .setQuery(boolQueryBuilder)
                     .get();
             SearchHits hits = response.getHits();
-            return "" + hits.getTotalHits();
+            //return "" + hits.getTotalHits();
+            return count+"";
             //什么都不输入的
         } else {
             List<String> K_AUTHORITY = new ArrayList<>();
@@ -275,7 +289,8 @@ public class GetDataIntegrated {
                     .setQuery(boolQueryBuilder)
                     .get();
             SearchHits hits = response.getHits();
-            return "" + hits.getTotalHits();
+            //return "" + hits.getTotalHits();
+            return count2+"";
         }
     }
 

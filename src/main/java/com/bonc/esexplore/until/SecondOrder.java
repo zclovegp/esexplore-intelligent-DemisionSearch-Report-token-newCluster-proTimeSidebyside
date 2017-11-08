@@ -39,7 +39,19 @@ public class SecondOrder {
             //    firstOrderList.get(0).put("ratings",999999999);
             //}
             //resultList = GroupBySearchWordAndSort.groupBySearchWordAndSort(firstOrderList,searchWord);
-            return firstOrderList;
+
+            //分页
+            if (from>firstOrderList.size()){
+                return resultList;
+            }else if((from+size)>firstOrderList.size()){
+                String b = null;
+                resultList = firstOrderList.subList(from,firstOrderList.size());
+                return resultList;
+            }else{
+                resultList = firstOrderList.subList(from,from+size);
+                return resultList;
+            }
+            //return firstOrderList;
         }
     }
 }

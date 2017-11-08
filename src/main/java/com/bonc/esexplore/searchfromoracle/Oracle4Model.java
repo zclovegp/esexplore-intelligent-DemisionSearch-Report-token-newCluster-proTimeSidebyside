@@ -1,6 +1,7 @@
 package com.bonc.esexplore.searchfromoracle;
 
 import com.bonc.esexplore.service.QueryAuthorityService;
+import com.bonc.esexplore.until.OneBecomeMore;
 import com.bonc.esexplore.until.OracleAuthorityAboutIn;
 import com.bonc.esexplore.until.OrderList;
 import com.bonc.esexplore.until.SecondOrder;
@@ -15,7 +16,7 @@ import java.util.List;
 public class Oracle4Model {
 
     //指标类走oracle
-    public static HashMap<String, Object> oracle4KPI(HashMap<String,Object> pid,List<HashMap<String, String>> child,String tabId,String userId,QueryAuthorityService queryAuthorityService,String from,String size,HashMap<String, Integer> ratingMap){
+    public static HashMap<String, Object> oracle4KPI(HashMap<String,Object> pid,List<HashMap<String, String>> child,String tabId,String userId,QueryAuthorityService queryAuthorityService,String from,String size,HashMap<String, Integer> ratingMap,List<HashMap<String, Object>> dimensionList){
         List<HashMap<String, Object>> resultListOracle = new ArrayList<>();
         HashMap<String, Object> hmF = new HashMap<>();
         if (child.size()==1){
@@ -67,11 +68,15 @@ public class Oracle4Model {
             re.put("ratings",ratingMap.get(tmpHm.get("KPI_CODE"))==null?0:ratingMap.get(tmpHm.get("KPI_CODE")));
             resultListOracle.add(re);
         }
+
+        List<HashMap<String, Object>> resultL = OneBecomeMore.oneBecomeMore(resultListOracle, dimensionList);
+
         List<HashMap<String, Object>> resultListOracleResult;
-        List<HashMap<String, Object>> tmpList = SecondOrder.secondOrder(resultListOracle,Integer.parseInt(from)-1,Integer.parseInt(size),"");
+        List<HashMap<String, Object>> tmpList = SecondOrder.secondOrder(resultL,Integer.parseInt(from)-1,Integer.parseInt(size),"");
         resultListOracleResult = OrderList.putOrder(tmpList,from);
         hmF.put("data", resultListOracleResult);
-        hmF.put("count", countOracle);
+        hmF.put("count", resultL.size()+"");
+        //hmF.put("count", countOracle);
         return hmF;
     }
 

@@ -2,6 +2,7 @@ package com.bonc.esexplore.fulltextsearch;
 
 import com.bonc.esexplore.dataform.DataForm;
 import com.bonc.esexplore.until.CodeTable;
+import com.bonc.esexplore.until.OneBecomeMore;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -22,8 +23,11 @@ import java.util.List;
  */
 public class NormalOrNothingGet {
 
+    public static int count=0;
+    public static int count2=0;
+
     //有输入搜索词
-    public static List<HashMap<String, Object>> normalGet(TransportClient client, String field, String searchWord, String from, String size, HashMap<String,Object> hashMapAuth, String index, String type, String K_T_R, String filterWhat, String tabId, HashMap<String, Integer> ratingMap){
+    public static List<HashMap<String, Object>> normalGet(TransportClient client, String field, String searchWord, String from, String size, HashMap<String,Object> hashMapAuth, String index, String type, String K_T_R, String filterWhat, String tabId, HashMap<String, Integer> ratingMap,List<HashMap<String, Object>> dimensionList){
         //确定index和type
         SearchRequestBuilder searchRequestBuilderTopic = client.prepareSearch(index)
                 .setTypes(type)
@@ -74,8 +78,10 @@ public class NormalOrNothingGet {
 
         SearchResponse responseTopic = searchRequestBuilderTopic.setQuery(boolQueryBuilder)
                 .addSort("_score", SortOrder.DESC).addSort(field+"_Length", SortOrder.ASC)
-                .setFrom(Integer.parseInt(from) - 1)
-                .setSize(Integer.parseInt(size))
+                //.setFrom(Integer.parseInt(from) - 1)
+                .setFrom(0)
+                //.setSize(Integer.parseInt(size))
+                .setSize(500)
                 .get();
 
         //对结果遍历放到list中
@@ -88,13 +94,21 @@ public class NormalOrNothingGet {
             HashMap<String, Object> tmpMap = DataForm.dataForm(searchHit.getType(), searchHit, ratingMap);
             resultList.add(tmpMap);
         }
+        //专题不加维度
+        if (!type.equals("K")){
+            return resultList;
+        }
 
-        return resultList;
+        //一个指标和多个维度组合进行拼接
+        List<HashMap<String, Object>> resultListF = OneBecomeMore.oneBecomeMore(resultList, dimensionList);
+        count = resultListF.size();
+
+        return resultListF;
 
     }
 
     //什么都不输入
-    public static List<HashMap<String, Object>> nothingGet(TransportClient client,String from,String size,HashMap<String,Object> hashMapAuth,String index,String type,String K_T_R,String filterWhat,String tabId,HashMap<String, Integer> ratingMap) {
+    public static List<HashMap<String, Object>> nothingGet(TransportClient client,String from,String size,HashMap<String,Object> hashMapAuth,String index,String type,String K_T_R,String filterWhat,String tabId,HashMap<String, Integer> ratingMap,List<HashMap<String, Object>> dimensionList) {
         //确定index和type
         SearchRequestBuilder searchRequestBuilderTopic = client.prepareSearch(index)
                 .setTypes(type)
@@ -135,7 +149,14 @@ public class NormalOrNothingGet {
             resultList.add(tmpMap);
         }
 
-        return resultList;
+        if (!type.equals("K")){
+            return resultList;
+        }
+
+        List<HashMap<String, Object>> resultListF = OneBecomeMore.oneBecomeMore(resultList, dimensionList);
+        count2 = resultListF.size();
+
+        return resultListF;
     }
 
     //统计总共个数（有搜索词）
@@ -194,7 +215,12 @@ public class NormalOrNothingGet {
 
         SearchHits hits = responseTopic.getHits();
 
-        return hits.getTotalHits()+"";
+        if (!type.equals("K")){
+            return hits.getTotalHits()+"";
+        }
+
+        //return hits.getTotalHits()+"";
+        return count+"";
 
     }
 
@@ -229,7 +255,12 @@ public class NormalOrNothingGet {
 
         SearchHits hits = responseTopic.getHits();
 
-        return hits.getTotalHits()+"";
+        if (!type.equals("K")){
+            return hits.getTotalHits()+"";
+        }
+
+        //return hits.getTotalHits()+"";
+        return count2+"";
     }
 
 }

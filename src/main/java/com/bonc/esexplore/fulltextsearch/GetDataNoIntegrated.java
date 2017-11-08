@@ -24,7 +24,7 @@ public class GetDataNoIntegrated {
 
     public static String esIndex;
 
-    public static List<HashMap<String,Object>> getData(TransportClient client,String field,String searchWord,String from,String size,HashMap<String,Object> hashMapAuth,String tabId,HashMap<String, Integer> ratingMap){
+    public static List<HashMap<String,Object>> getData(TransportClient client,String field,String searchWord,String from,String size,HashMap<String,Object> hashMapAuth,String tabId,HashMap<String, Integer> ratingMap,List<HashMap<String, Object>> dimensionList){
         HashMap<String,String> propertiesMap = SetESConfig.getPropertiesES();
         esIndex = propertiesMap.get("esIndex");
 
@@ -36,30 +36,30 @@ public class GetDataNoIntegrated {
                 if (field.equals("2")) {
                     //当搜索词不为空的时候
                     if (!searchWord.equals("")) {
-                        liF = NormalOrNothingGet.normalGet(client,"Subject_Name",searchWord,from,size,hashMapAuth,esIndex,"T","T_AUTHORITY","Subject_Code",tabId,ratingMap);
+                        liF = NormalOrNothingGet.normalGet(client,"Subject_Name",searchWord,from,size,hashMapAuth,esIndex,"T","T_AUTHORITY","Subject_Code",tabId,ratingMap,dimensionList);
                         return liF;
                     } else {
-                        liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"T","T_AUTHORITY","Subject_Code",tabId,ratingMap);
+                        liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"T","T_AUTHORITY","Subject_Code",tabId,ratingMap,dimensionList);
                         return liF;
                     }
 
                     //指标类型的
                 } else if (field.equals("1")) {
                     if (!searchWord.equals("")) {
-                    liF = NormalOrNothingGet.normalGet(client,"KPI_Name",searchWord,from,size,hashMapAuth,esIndex,"K","K_AUTHORITY","KPI_Code",tabId,ratingMap);
+                    liF = NormalOrNothingGet.normalGet(client,"KPI_Name",searchWord,from,size,hashMapAuth,esIndex,"K","K_AUTHORITY","KPI_Code",tabId,ratingMap,dimensionList);
                     return liF;
                     } else {
-                    liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"K","K_AUTHORITY","KPI_Code",tabId,ratingMap);
+                    liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"K","K_AUTHORITY","KPI_Code",tabId,ratingMap,dimensionList);
                     return  liF;
                     }
 
                     //报告类型的
                 } else if (field.equals("3")) {
                     if (!searchWord.equals("")) {
-                        liF = NormalOrNothingGet.normalGet(client,"Report_Name",searchWord,from,size,hashMapAuth,esIndex,"R","R_AUTHORITY","Report_Code",tabId,ratingMap);
+                        liF = NormalOrNothingGet.normalGet(client,"Report_Name",searchWord,from,size,hashMapAuth,esIndex,"R","R_AUTHORITY","Report_Code",tabId,ratingMap,dimensionList);
                         return liF;
                     } else {
-                        liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"R","R_AUTHORITY","Report_Code",tabId,ratingMap);
+                        liF = NormalOrNothingGet.nothingGet(client,from,size,hashMapAuth,esIndex,"R","R_AUTHORITY","Report_Code",tabId,ratingMap,dimensionList);
                         return liF;
                     }
 

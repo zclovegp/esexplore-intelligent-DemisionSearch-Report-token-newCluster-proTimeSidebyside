@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ESSearch {
      * */
     @ApiOperation("调用搜索参数")
     @PostMapping("/explore")
-    public Object search(@RequestBody @ApiParam("参数") String param) throws IOException {
+    public Object search(@RequestBody @ApiParam("参数") String param) throws IOException, ParseException {
         param = URLDecoder.decode(param, "UTF-8");
         System.out.println("接收到的参数有:"+param);
         String[] paramArray = param.split(",");
@@ -99,7 +100,7 @@ public class ESSearch {
                 }
             }
             //在维度索引中进行查询
-            HashMap<String, Object> dimensionMap = DimensionSearch.dimensionSearch(searchWord, client);
+            List<HashMap<String, Object>> dimensionList = DimensionSearch.dimensionSearch(searchWord, client);
 
             //这里要把用户历史的点击量也考虑进来
             HashMap<String, Integer> ratingMap = GetHistoryRating.getHistoryRating(client, userId, esLogIndex);
@@ -117,7 +118,7 @@ public class ESSearch {
                     //判断用户是否在表中，如果在表中有什么东西不能看
                     hashMapAuth = qa.filterAuthority(userId,queryAuthorityService);
                     //拿数据
-                    resultList = GetDataNoIntegrated.getData(client, field, searchWord, from, size, hashMapAuth, tabId, ratingMap);
+                    resultList = GetDataNoIntegrated.getData(client, field, searchWord, from, size, hashMapAuth, tabId, ratingMap,dimensionList);
                     //根据历史点击量重排序+分页
                     resultListF = SecondOrder.secondOrder(resultList,Integer.parseInt(from)-1,Integer.parseInt(size),searchWord);
                     //putOrder
@@ -125,7 +126,7 @@ public class ESSearch {
                     String count = GetDataNoIntegrated.getDataCount(client, field, searchWord, hashMapAuth,tabId);
                     hmF.put("data", resultListFFF);
                     hmF.put("count", count);
-                    hmF.put("dimension",dimensionMap);
+                    //hmF.put("dimension",dimensionMap);
                     return hmF;
                     //综合查询用这个
                 } else {
@@ -135,7 +136,7 @@ public class ESSearch {
                     //用户是在表中的
                     if (!hashMapAuth.get("flag").equals("-1")) {
                         //拿数据
-                        resultList = GetDataIntegrated.getData(client, searchWord, from, size, hashMapAuth, tabId, ratingMap);
+                        resultList = GetDataIntegrated.getData(client, searchWord, from, size, hashMapAuth, tabId, ratingMap,dimensionList);
                         //根据历史点击量重排序+分页
                         resultListF = SecondOrder.secondOrder(resultList,Integer.parseInt(from)-1,Integer.parseInt(size),searchWord);
                         //putOrder
@@ -146,7 +147,7 @@ public class ESSearch {
                     }
                     hmF.put("data", resultListFFF);
                     hmF.put("count", count);
-                    hmF.put("dimension",dimensionMap);
+                    //hmF.put("dimension",dimensionMap);
                     return hmF;
                 }
                 //直接从oracle进行提数
@@ -154,15 +155,15 @@ public class ESSearch {
                 //指标类从oracle直接拿
                 if (field.equals("1")){
                     System.out.println("这条数据是从oracle直接读取的----指标");
-                    HashMap<String, Object> hmF = Oracle4Model.oracle4KPI(pid,child,tabId,userId,queryAuthorityService,from,size,ratingMap);
-                    hmF.put("dimension",dimensionMap);
+                    HashMap<String, Object> hmF = Oracle4Model.oracle4KPI(pid,child,tabId,userId,queryAuthorityService,from,size,ratingMap,dimensionList);
+                    //hmF.put("dimension",dimensionMap);
                 return hmF;
 
                 //专题类直接从oracle拿
               }else if (field.equals("2")){
                     System.out.println("这条数据是从oracle直接读取的----专题");
                     HashMap<String, Object> hmF = Oracle4Model.oracle4Subject(pid,child,tabId,userId,queryAuthorityService,from,size,ratingMap);
-                    hmF.put("dimension",dimensionMap);
+                    //hmF.put("dimension",dimensionMap);
                     return hmF;
                 }
                 //不会走到这里...
