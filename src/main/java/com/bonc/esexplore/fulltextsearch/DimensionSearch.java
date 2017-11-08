@@ -111,7 +111,6 @@ public class DimensionSearch {
                 proCityMap.put("provId",jsonData.get("code").toString());
                 proCityMap.put("cityId","-1");
                 offsetProCityMap.put(offset,proCityMap);
-
             }
             if(jsonData.get("dimensiontype").toString().equals("area")){
                 searchWordExceptDimension = searchWordExceptDimension.replace(jsonData.get("searchword").toString(),"");
@@ -131,7 +130,6 @@ public class DimensionSearch {
             public int compare(Map.Entry<Integer, HashMap<String,String>> o1,Map.Entry<Integer, HashMap<String,String>> o2) {
                 return o1.getKey()-o2.getKey();
             }
-
         });
         System.out.println("排序后的省份地市是--->"+list);
         for(Map.Entry<Integer,HashMap<String,String>> mapping:list){
@@ -168,9 +166,6 @@ public class DimensionSearch {
                 dateList.add(str);
                 searchWordExceptDimension = searchWordExceptDimension.replace(matcher.group(0).toString(),"");
             }
-            //dateList.add(matcher.group(0).trim());
-            //去除原先搜索词中的
-            //searchWordExceptDimension = searchWordExceptDimension.replace(matcher.group(0).toString(),"");
         }
 
         System.out.println("抛去所有维度后搜索词是--->"+searchWordExceptDimension);
